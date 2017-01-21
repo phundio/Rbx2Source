@@ -47,6 +47,7 @@ namespace Rbx2Source
         private string latestCompiledModel;
         private GameInfo latestCompiledOnGame;
         private Dictionary<Control, string> Links;
+        private bool inDarkTheme = false;
 
         private static List<OutputLog> outputQueue = new List<OutputLog>();
         private static Dictionary<string, bool> progressQueue = new Dictionary<string, bool>();
@@ -610,6 +611,8 @@ namespace Rbx2Source
             foreach (Control link in Links.Keys)
                 link.Click += new EventHandler(onLinkClicked);
 
+            refreshSettings();
+
             Task.Run(async() =>
             {
                 while (true)
@@ -659,6 +662,90 @@ namespace Rbx2Source
         {
             if (baseProcess != null && !baseProcess.IsDisposed)
                 baseProcess.Dispose();
+        }
+
+        // Settings
+
+        private void refreshSettings()
+        {
+            foreach (Control control in settingsPage.Controls)
+            {
+                object tag = control.Tag;
+                if (tag != null)
+                {
+                    string settingName = tag.ToString();
+                    object settingObj = Settings.GetSetting(settingName);
+                    if (settingObj != null)
+                    {
+                        string setting = settingObj.ToString();
+                        double value;
+                        if (double.TryParse(setting, out value))
+                        {
+                            TextBox textBox = (TextBox)control;
+                            if (textBox != null)
+                                textBox.Text = value.ToString();
+                        }
+                        else
+                        {
+                            string str = setting.ToString();
+                            bool isChecked;
+                            if (bool.TryParse(str.ToLower(), out isChecked))
+                            {
+                                CheckBox checkBox = (CheckBox)control;
+                                checkBox.Checked = isChecked;
+                            }
+                            else
+                            {
+                                TextBox textBox = (TextBox)control;
+                                if (textBox != null)
+                                    textBox.Text = str;
+                            }
+                        }
+                    }
+                }
+            }
+            Settings.Save();
+        }
+
+        private void MainTab_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Settings.UnsavedChanges)
+            {
+                DialogResult result = MessageBox.Show("You have unsaved changes!\nWould you like to save them?", "Save changes?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.Yes)
+                    Settings.Save();
+                else
+                    Settings.RestoreSavedChanges();
+
+                refreshSettings();
+            }
+        }
+
+        private void restoreDefaults_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Are you sure you want to restore the default settings?\nThis cannot be undone.", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                Settings.RestoreDefaults();
+                refreshSettings();
+            }
+        }
+
+        private void saveChanges_Click(object sender, EventArgs e)
+        {
+            Settings.Save();
+            refreshSettings();
+            MessageBox.Show("Settings have been successfully changed!", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        }
+
+        private void checkStateChanged(object sender, EventArgs e)
+        {
+            CheckBox check = (CheckBox)sender;
+            if (check != null)
+            {
+                string tag = (string)check.Tag;
+                Settings.SetSetting(tag, check.Checked);
+            }
         }
     }
 }

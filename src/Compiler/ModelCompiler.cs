@@ -67,7 +67,7 @@ namespace Rbx2Source.Compiler
 			vtfCompiler = new ThirdPartyUtility(vtfCompilerPath);
 			vtfCompiler.AddParameter("folder",pngWildcard);
 			vtfCompiler.AddParameter("resize");
-			vtfCompiler.AddParameter("format", "ABGR8888"); // No compression? THIS IS FINE.png
+			vtfCompiler.AddParameter("format", "ABGR8888");
 			vtfCompiler.AddParameter("output",data.MaterialDirectory);
             await vtfCompiler.Run();
             Rbx2Source.MarkTaskCompleted("CompileTextures");

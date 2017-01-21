@@ -2527,7 +2527,12 @@
 </value>
   </data>
   <data name="changeLogBox.Text" xml:space="preserve">
-    <value>[v2.03] (January 1st, 2017)
+    <value>[v2.10] (January 4th, 2017)
+• Added the Settings tab.
+• The change log will now be opened automatically
+  when updates are shipped.
+______________________________________________________
+[v2.03] (January 1st, 2017)
 • Fixed a small bug that was causing the compiler to 
   fail with users who glitched a space after their 
   name.
